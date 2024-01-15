@@ -8,7 +8,7 @@ You have to configure depot_verifier.ini with the 3 directories needed:
 - GameDir: directory that contains the game directories. The names are expected to be equal to "installdir" in the acf file
 
 You can then use the script by running:
-'''
+```
 depot_verifier.exe appid [appid...]
-'''
+```
 You can use multiple appids and the script will fetch the corresponding acfs, find the manifests and verify each file using the sha1 digest.
