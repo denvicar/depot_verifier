@@ -12,3 +12,21 @@ You can then use the script by running:
 depot_verifier.exe appid [appid...]
 ```
 You can use multiple appids and the script will fetch the corresponding acfs, find the manifests and verify each file using the sha1 digest.
+
+## Build
+You can use CMake to build the project, just clone the repo:
+
+```
+git clone https://github.com/denvicar/depot_verifier.git
+cd depot_verifier
+git submodule update --init --recursive
+```
+
+Then from the root dir run:
+
+```
+cmake -S. -Bbuild
+cmake --build build
+```
+
+Refer to Cmake documentation to customize the build type.
