@@ -21,13 +21,13 @@ protobuf/content_manifest.pb.cc
 utils/util.cpp
 )
 
-target_compile_features(depot_verifier PUBLIC cxx_std_17)
-target_include_directories(depot_verifier PUBLIC acf hash manifest protobuf utils)
+target_compile_features(depot_verifier PRIVATE cxx_std_17)
+target_include_directories(depot_verifier PRIVATE acf hash manifest protobuf utils)
 
 find_package(OpenSSL REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 
-target_link_libraries(depot_verifier PUBLIC OpenSSL::SSL protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
+target_link_libraries(depot_verifier PRIVATE OpenSSL::SSL protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
 
 if(WIN32)
   add_custom_command(
