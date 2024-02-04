@@ -1,16 +1,16 @@
 #pragma once
+#include <filesystem>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 using std::string;
 using std::vector;
 using std::filesystem::path;
 
 struct acf_info {
-    string name;
-    string installdir;
-    vector<string> manifests;
+  string name;
+  string installdir;
+  vector<string> manifests;
 };
 
 const string ACF_NAME = "\"name\"";

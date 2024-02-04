@@ -29,4 +29,14 @@ cmake -S. -Bbuild
 cmake --build build
 ```
 
+Add `-DVCPKG_TARGET_TRIPLET=x64-windows-static` to the first command for a static build.
+
 Refer to Cmake documentation to customize the build type.
+
+## Format
+
+Build the custom format target to use clang-format to format the source code. Clang-format has to be installed on the system.
+
+```
+cmake --build build --target format
+```

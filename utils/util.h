@@ -1,10 +1,8 @@
 #pragma once
 #include <string>
 #include <unordered_map>
-using std::unordered_map;
 using std::string;
-
-
+using std::unordered_map;
 
 void ltrim(string&);
 
