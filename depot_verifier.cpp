@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
 
-  if (argc == 2 && argv[1] == "-h") {
+  if (argc == 2 && strcmp(argv[1],"-h")==0) {
     cout << "Usage: depot_verifier.exe appid [appid...]\nSpecify the relevant "
             "paths in depot_verifier.ini\n";
     return 0;
