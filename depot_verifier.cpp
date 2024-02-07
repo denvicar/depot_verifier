@@ -10,6 +10,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <vector>
+#include <boost/program_options.hpp>
 
 #include "acf/acf.h"
 #include "hash/hash.h"
@@ -18,31 +19,34 @@
 #include "utils/util.h"
 
 using namespace std;
+namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
   ios_base::sync_with_stdio(false);
 
-  if (argc < 2) {
-    cerr << "Expected at least one appid\n";
-    cerr << "Usage: depot_verifier.exe appid [appid...]\n";
+  string help_message;
+  po::variables_map vm = InitParse(argc,argv,help_message);
+
+  if (vm.count("help")) {
+    cout << help_message;
     return 1;
   }
 
-  if (argc == 2 && strcmp(argv[1],"-h")==0) {
-    cout << "Usage: depot_verifier.exe appid [appid...]\nSpecify the relevant "
-            "paths in depot_verifier.ini\n";
-    return 0;
+  if (vm.count("appids") < 1) {
+    cerr << "Expected at least one appid\n";
+    cerr << help_message;
+    return 1;
   }
 
-  unordered_map<string, string> properties = read_config();
+  //unordered_map<string, string> properties = read_config();
 
-  filesystem::path acf_dir(properties["AcfDir"]);
-  filesystem::path manifest_dir(properties["ManifestDir"]);
-  filesystem::path game_dir(properties["GameDir"]);
+  filesystem::path acf_dir(vm["SteamDirectories.AcfDir"].as<string>());
+  filesystem::path manifest_dir(vm["SteamDirectories.ManifestDir"].as<string>());
+  filesystem::path game_dir(vm["SteamDirectories.GameDir"].as<string>());
 
   if (!filesystem::exists(acf_dir) || !filesystem::exists(manifest_dir)
       || !filesystem::exists(game_dir)) {
-    cerr << "Check depot_verifier.ini, one of the specified paths does not "
+    cerr << "Check provided options, one of the specified paths does not "
             "exist\n";
     return 1;
   }
@@ -54,12 +58,12 @@ int main(int argc, char* argv[]) {
   vector<string> processed_files;
   unordered_map<string, vector<int>> summary;
 
-  for (int i = 1; i < argc; ++i) {
+  for (const string& appid : vm["appids"].as<vector<string>>()) {
     for (const filesystem::directory_entry& entry :
          filesystem::directory_iterator{acf_dir}) {
-      if (entry.path().string().find(argv[i]) != string::npos) {
+      if (entry.path().string().find(appid) != string::npos) {
         info = get_acf_info(entry.path());
-        std::cout << "appid: \033[34m" << argv[i] << "\033[0m"
+        std::cout << "appid: \033[34m" << appid << "\033[0m"
                   << "\nname: \033[34m" << info.name << "\033[0m"
                   << "\ninstalldir: \033[34m" << info.installdir << "\033[0m"
                   << "\nmanifests: \033[34m" << info.manifests.size()

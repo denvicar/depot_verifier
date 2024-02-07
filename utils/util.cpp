@@ -6,6 +6,10 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <sstream>
+#include <boost/program_options.hpp>
+
+namespace po = boost::program_options;
 
 using std::cerr;
 using std::find_if;
@@ -27,6 +31,68 @@ void rtrim(string& line) {
                      [](unsigned char ch) { return !isspace(ch); })
                  .base(),
              line.end());
+}
+
+po::variables_map InitParse(int ac, char* av[], string& help_message) {
+  po::arg = "PATH";
+  po::options_description generic("Generic options");
+  generic.add_options()
+    ("help,h","generate this help message")
+    ;
+
+  // po::options_description config("Configuration");
+  // config.add_options()
+  //   ("AcfDir,a",po::value<std::string>(),"path where the acf files are stored")
+  //   ("ManifestDir,m",po::value<std::string>(),"path where the manifest files are stored")
+  //   ("GameDir,g",po::value<std::string>(),"path where the game directories are stored")
+  //   ;
+
+  po::options_description file_options("Config file options");
+  file_options.add_options()
+    ("SteamDirectories.AcfDir",po::value<std::string>(),"path where the acf files are stored")
+    ("SteamDirectories.ManifestDir",po::value<std::string>(),"path where the manifest files are stored")
+    ("SteamDirectories.GameDir",po::value<std::string>(),"path where the game directories are stored")
+    ;
+  
+
+  po::options_description hidden("Hidden");
+  hidden.add_options()("appids",po::value<std::vector<std::string>>(), "list of appids");
+
+  po::options_description cmd_line_options;
+  cmd_line_options.add(generic).add(hidden);
+  po::options_description visible;
+  visible.add(generic).add(file_options);
+  po::positional_options_description pd;
+  pd.add("appids",-1);
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(ac,av)
+    .options(cmd_line_options).positional(pd).run(),vm);
+  po::store(po::parse_config_file("depot_verifier.ini",file_options, true),vm);
+  po::notify(vm);
+
+
+  help_message = GetHelpMessage(visible);
+  return vm;
+}
+
+std::string GetHelpMessage(po::options_description opt) {
+  std::stringstream ss;
+  ss << "Usage: depot_verifier.exe [options] appid1 [appid2 [...]]";
+  ss << opt;
+  ss << "\nOptions (except appids) have to be specified in depot_verifier.ini."
+     << "\n";
+  return ss.str();
+}
+
+unordered_map<string,string> ParseOptions(po::variables_map vm) {
+  unordered_map<string,string> props;
+
+  for (auto& x : vm) {
+    if (x.first != "appids")
+      props.emplace(x.first,x.second.as<string>());
+  }
+  return props;
 }
 
 unordered_map<string, string> read_config() {

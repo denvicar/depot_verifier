@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/extern/vcpkg/scripts/buildsystems/vcpkg.cmake"
   CACHE STRING "Vcpkg toolchain file")
+set(VCPKG_TARGET_TRIPLET "x64-windows-static")
 
 project(
     DepotVerifier
@@ -45,8 +46,9 @@ target_include_directories(depot_verifier PRIVATE acf hash manifest protobuf uti
 
 find_package(OpenSSL REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options)
 
-target_link_libraries(depot_verifier PRIVATE OpenSSL::SSL protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
+target_link_libraries(depot_verifier PRIVATE OpenSSL::SSL protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite Boost::program_options)
 
 if (NOT ${PROJECT_NAME}_CLANG_FORMAT_BINARY)
   find_program(${PROJECT_NAME}_CLANG_FORMAT_BINARY clang-format)
