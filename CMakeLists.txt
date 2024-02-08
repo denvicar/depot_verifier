@@ -13,14 +13,16 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 set(Protobuf_USE_STATIC_LIBS ON)
 set(OPENSSL_USE_STATIC_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(exe_sources depot_verifier.cpp
+
+set(main_sources
 
 acf/acf.cpp
 hash/hash.cpp
 manifest/StructReader.cpp
 manifest/DepotManifest.cpp
+validation/validator.cc
 
-utils/util.cpp)
+utils/depot_utils.cpp)
 
 set(headers
 acf/acf.h
@@ -28,27 +30,25 @@ hash/hash.h
 manifest/DepotFile.h
 manifest/DepotManifest.h
 manifest/StructReader.h
-utils/util.h
+utils/depot_utils.h
+validation/validator.h
 )
-
-add_executable(depot_verifier 
-${exe_sources}
-
-protobuf/content_manifest.pb.cc
-)
-
-set_property(TARGET depot_verifier PROPERTY
-  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-
-target_compile_features(depot_verifier PRIVATE cxx_std_17)
-target_include_directories(depot_verifier PRIVATE acf hash manifest protobuf utils)
 
 find_package(OpenSSL REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
 
-target_link_libraries(depot_verifier PRIVATE OpenSSL::SSL protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite Boost::program_options)
+add_library(depot_verifier_lib STATIC ${main_sources} protobuf/content_manifest.pb.cc)
+target_link_libraries(depot_verifier_lib PUBLIC OpenSSL::SSL protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite Boost::program_options)
+target_compile_features(depot_verifier_lib PUBLIC cxx_std_17)
+target_include_directories(depot_verifier_lib PUBLIC acf hash manifest protobuf utils validation)
+set_property(TARGET depot_verifier_lib PROPERTY
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+add_executable(depot_verifier depot_verifier.cpp)
+target_link_libraries(depot_verifier PRIVATE depot_verifier_lib)
+set_property(TARGET depot_verifier PROPERTY
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 if (NOT ${PROJECT_NAME}_CLANG_FORMAT_BINARY)
   find_program(${PROJECT_NAME}_CLANG_FORMAT_BINARY clang-format)
@@ -57,7 +57,7 @@ endif()
 if (${PROJECT_NAME}_CLANG_FORMAT_BINARY)
   add_custom_target(format
     COMMAND ${${PROJECT_NAME}_CLANG_FORMAT_BINARY}
-    -i ${exe_sources} ${headers}
+    -i ${main_sources} ${headers} depot_verifier.cpp tests/depotverifier_test.cc
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 endif()
 
@@ -70,5 +70,22 @@ if(WIN32)
     VERBATIM
   )
 endif()
+
+find_package(Catch2 CONFIG REQUIRED)
+add_executable(depot_verifier_test tests/depotverifier_test.cc)
+set_property(TARGET depot_verifier_test PROPERTY
+  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+target_link_libraries(depot_verifier_test PRIVATE Catch2::Catch2 Catch2::Catch2WithMain depot_verifier_lib)
+
+include(CTest)
+include(Catch)
+catch_discover_tests(depot_verifier_test)
+
+set(ACF_PATH "\"${PROJECT_SOURCE_DIR}/testdata/appmanifest_999999.acf\"")
+set(HASH_PATH "\"${PROJECT_SOURCE_DIR}/testdata/test_hash.txt\"")
+configure_file(test_config.h.in test_config.h @ONLY)
+target_include_directories(depot_verifier_test PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+
 
 

@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "../utils/util.h"
+#include "depot_utils.h"
 
 using std::cerr;
 using std::getline;
@@ -18,62 +18,70 @@ using std::string;
 using std::vector;
 using std::filesystem::path;
 
-bool depot_id_line(const string& line) {
-  for (const char& c : line) {
-    if (c != '"' && !isdigit(c)) return false;
-  }
-  return true;
-}
-
-acf_info get_acf_info(path p) {
-  ifstream f(p);
-  if (!f.is_open()) {
-    cerr << "Error while opening config file";
-    exit(EXIT_FAILURE);
-  }
-  acf_info info;
-
-  string line;
-  string manifest_prefix;
-  size_t info_start;
-  bool manifest_part = false;
-  int bracket_count = 0;
-  while (getline(f, line)) {
-    ltrim(line);
-    if (auto p = line.find(ACF_NAME); p != string::npos) {
-      info_start = line.find("\"", p + ACF_NAME.size()) + 1;
-      info.name = line.substr(info_start, line.find_last_of("\"") - info_start);
-    } else if (auto p = line.find(ACF_INSTALL_DIR); p != string::npos) {
-      info_start = line.find("\"", p + ACF_INSTALL_DIR.size()) + 1;
-      info.installdir
-          = line.substr(info_start, line.find_last_of("\"") - info_start);
-    } else if (auto p = line.find(ACF_MANIFEST); p != string::npos) {
-      manifest_part = true;
-      getline(f, line);
-      continue;
+namespace depotverifier {
+  AcfInfo::AcfInfo(path p, string appid) : appid_(appid) {
+    ifstream f(p);
+    if (!f.is_open()) {
+      cerr << "Error while opening config file";
+      exit(EXIT_FAILURE);
     }
 
-    if (manifest_part) {
-      if (line[0] == '}') {
-        if (bracket_count == 1)
-          manifest_part = false;
-        else
-          bracket_count++;
-      }
-      if (auto p = line.find(MANIFEST_START); p != string::npos) {
-        // concatenate manifest_prefix with buildid
-        info_start = line.find("\"", p + MANIFEST_START.size()) + 1;
-        string manifestId
+    string line;
+    string manifest_prefix;
+    size_t info_start;
+    bool manifest_part = false;
+    int bracket_count = 0;
+    while (getline(f, line)) {
+      ltrim(line);
+      if (auto p = line.find(kAcfName); p != string::npos) {
+        info_start = line.find("\"", p + kAcfName.size()) + 1;
+        name_ = line.substr(info_start, line.find_last_of("\"") - info_start);
+      } else if (auto p = line.find(kAcfInstallDir); p != string::npos) {
+        info_start = line.find("\"", p + kAcfInstallDir.size()) + 1;
+        installdir_
             = line.substr(info_start, line.find_last_of("\"") - info_start);
-        info.manifests.push_back(manifest_prefix + "_" + manifestId
-                                 + ".manifest");
-        bracket_count = 0;
-      } else if (depot_id_line(line)) {
-        manifest_prefix = line.substr(1, line.find_last_of('"') - 1);
+      } else if (auto p = line.find(kAcfManifest); p != string::npos) {
+        manifest_part = true;
+        getline(f, line);
         continue;
       }
+
+      if (manifest_part) {
+        if (line[0] == '}') {
+          if (bracket_count == 1)
+            manifest_part = false;
+          else
+            bracket_count++;
+        }
+        if (auto p = line.find(kManifestStart); p != string::npos) {
+          // concatenate manifest_prefix with buildid
+          info_start = line.find("\"", p + kManifestStart.size()) + 1;
+          string manifestId
+              = line.substr(info_start, line.find_last_of("\"") - info_start);
+          manifests_.push_back(manifest_prefix + "_" + manifestId
+                               + ".manifest");
+          bracket_count = 0;
+        } else if (DepotIdLine(line)) {
+          manifest_prefix = line.substr(1, line.find_last_of('"') - 1);
+          continue;
+        }
+      }
     }
   }
 
-  return info;
-}
+  bool AcfInfo::DepotIdLine(const string& line) {
+    for (const char& c : line) {
+      if (c != '"' && !isdigit(c)) return false;
+    }
+    return true;
+  }
+
+  std::ostream& operator<<(std::ostream& os, const AcfInfo& obj) {
+    os << "appid: \033[34m" << obj.appid_ << "\033[0m"
+       << "\nname: \033[34m" << obj.name_ << "\033[0m"
+       << "\ninstalldir: \033[34m" << obj.installdir_ << "\033[0m"
+       << "\nmanifests: \033[34m" << obj.manifests_.size() << "\033[0m\n";
+    return os;
+  }
+
+}  // namespace depotverifier

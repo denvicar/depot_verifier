@@ -1,0 +1,14 @@
+"AppState"
+{
+	"appid"		"999999"
+	"name"		"TEST NAME"
+	"installdir"		"TEST INSTALL DIR"
+	"InstalledDepots"
+	{
+		"999999"
+		{
+			"manifest"		"1099988877766655544"
+			"size"		"4236130529"
+		}
+	}
+}

@@ -1,0 +1,5 @@
+#ifndef _TEST_CONFIG_H
+#define _TEST_CONFIG_H
+const char* kTestAcfPath = @ACF_PATH@;
+const char* kTestHashPath = @HASH_PATH@;
+#endif // _TEST_CONFIG_H
