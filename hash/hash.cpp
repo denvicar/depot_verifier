@@ -1,14 +1,13 @@
 #include "hash.h"
 
-#include <openssl/evp.h>
-#include <openssl/sha.h>
-
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#include "./sha1.hpp"
 
 using std::hex;
 using std::ifstream;
@@ -28,28 +27,35 @@ string depotverifier::ByteToHex(string& hash) {
 }
 
 namespace depotverifier {
-  HashManager::HashManager() { ctx = EVP_MD_CTX_new(); }
-  HashManager::~HashManager() { EVP_MD_CTX_free(ctx); }
+  HashManager::HashManager() {
+    // ctx = EVP_MD_CTX_new();
+  }
+  HashManager::~HashManager() {
+    // EVP_MD_CTX_free(ctx);
+  }
+
   void HashManager::ComputeHash() {
-    EVP_DigestInit_ex(ctx, EVP_sha1(), nullptr);
+    // EVP_DigestInit_ex(ctx, EVP_sha1(), nullptr);
     ifstream f(current_file, std::ios::binary);
     vector<char> buffer(8192);
 
     while (true) {
       f.read(buffer.data(), buffer.size());
-      EVP_DigestUpdate(ctx, buffer.data(), f.gcount());
+      // EVP_DigestUpdate(ctx, buffer.data(), f.gcount());
+      sha_gen.Update(std::string(buffer.data(), f.gcount()));
       if (f.eof()) break;
     }
 
-    unsigned char digest[SHA_DIGEST_LENGTH];
+    // unsigned char digest[SHA_DIGEST_LENGTH];
+    std::string digest = sha_gen.Final();
 
-    EVP_DigestFinal_ex(ctx, digest, nullptr);
+    // EVP_DigestFinal_ex(ctx, digest, nullptr);
 
     stringstream result;
 
-    for (int i = 0; i < SHA_DIGEST_LENGTH; ++i) {
+    for (unsigned char ch : digest) {
       result << hex << std::setw(2) << std::setfill('0')
-             << static_cast<int>(digest[i]);
+             << static_cast<int>(ch);
     }
 
     hash = result.str();

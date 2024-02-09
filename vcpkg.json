@@ -1,7 +1,6 @@
 {
   "dependencies": [
     "boost-program-options",
-    "openssl",
     "protobuf",
     "catch2"
   ]

@@ -1,9 +1,10 @@
 #ifndef _HASH_H
 #define _HASH_H
-#include <openssl/evp.h>
 
 #include <filesystem>
 #include <string>
+
+#include "./sha1.hpp"
 
 // std::string get_hash_content(EVP_MD_CTX*, std::filesystem::path);
 
@@ -18,7 +19,8 @@ namespace depotverifier {
     ~HashManager();
 
   private:
-    EVP_MD_CTX* ctx;
+    Sha1Sum sha_gen;
+
     std::filesystem::path current_file;
     std::string hash;
     void ComputeHash();

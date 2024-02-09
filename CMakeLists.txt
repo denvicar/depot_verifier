@@ -11,13 +11,13 @@ project(
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 set(Protobuf_USE_STATIC_LIBS ON)
-set(OPENSSL_USE_STATIC_LIBS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(main_sources
 
 acf/acf.cpp
 hash/hash.cpp
+hash/sha1.hpp
 manifest/StructReader.cpp
 manifest/DepotManifest.cpp
 validation/validator.cc
@@ -34,14 +34,13 @@ utils/depot_utils.h
 validation/validator.h
 )
 
-find_package(OpenSSL REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options)
 
 add_library(depot_verifier_lib STATIC ${main_sources} protobuf/content_manifest.pb.cc)
-target_link_libraries(depot_verifier_lib PUBLIC OpenSSL::SSL protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite Boost::program_options)
+target_link_libraries(depot_verifier_lib PUBLIC protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite Boost::program_options)
 target_compile_features(depot_verifier_lib PUBLIC cxx_std_17)
-target_include_directories(depot_verifier_lib PUBLIC acf hash manifest protobuf utils validation)
+target_include_directories(depot_verifier_lib PUBLIC acf manifest protobuf utils validation)
 set_property(TARGET depot_verifier_lib PROPERTY
   MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
