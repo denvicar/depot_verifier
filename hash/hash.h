@@ -13,10 +13,8 @@ namespace depotverifier {
 
   class HashManager {
   public:
-    HashManager();
     void SetFile(std::filesystem::path path);
     std::string GetHash();
-    ~HashManager();
 
   private:
     Sha1Sum sha_gen;
