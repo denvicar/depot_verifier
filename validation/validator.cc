@@ -63,7 +63,7 @@ namespace depotverifier {
 
   void Validator::UpdateSummary() {
     summary_.insert(
-        make_pair(current_acf_.name(),
+        make_pair(current_acf_->name(),
                   vector<int>{static_cast<int>(processed_files_.size()),
                               missing, wrong, ok}));
   }
@@ -95,9 +95,8 @@ namespace depotverifier {
     ReadGameFiles();
 
     cout << "game files: " << game_files_.size() << '\n';
-
-    for (auto it = current_acf_.manifests().rbegin();
-         it != current_acf_.manifests().rend(); ++it) {
+    const vector<string>& manifests = current_acf_->manifests();
+    for (auto it = manifests.rbegin(); it != manifests.rend(); ++it) {
       cout << "manifest: " << *it << '\n';
       filesystem::path manifest_path = manifest_dir_ / (*it);
       if (!filesystem::exists(manifest_path)) {

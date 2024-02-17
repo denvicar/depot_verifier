@@ -17,7 +17,7 @@ namespace depotverifier {
     AcfInfo(path p, string appid);
     string name() const { return name_; };
     string installdir() const { return installdir_; };
-    vector<string> manifests() const { return manifests_; };
+    const vector<string>& manifests() const { return manifests_; };
     friend std::ostream& operator<<(std::ostream& os, const AcfInfo& obj);
 
   private:

@@ -19,7 +19,7 @@ namespace depotverifier {
     HashManager hash_manager_;
     int ok = 0, missing = 0, wrong = 0;
     std::filesystem::path current_game_dir_;
-    AcfInfo current_acf_;
+    AcfInfo* current_acf_;
 
     void ValidateDepotFile(const DepotFile& df);
     void UpdateSummary();
@@ -28,8 +28,8 @@ namespace depotverifier {
 
   public:
     Validator(std::filesystem::path manifest_dir)
-        : manifest_dir_(manifest_dir){};
-    void set_acf(const AcfInfo& acf) { current_acf_ = acf; };
+        : manifest_dir_(manifest_dir), current_acf_(nullptr){};
+    void set_acf(AcfInfo* acf) { current_acf_ = acf; };
     void set_game_dir(const std::filesystem::path& dir) {
       current_game_dir_ = dir;
     };

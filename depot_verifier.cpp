@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
         std::cout << info;
         filesystem::path game_main_dir = game_dir / (info.installdir());
 
-        validator.set_acf(info);
+        validator.set_acf(&info);
         validator.set_game_dir(game_main_dir);
 
         validator.Validate();
