@@ -29,8 +29,7 @@ namespace depotverifier {
   public:
     Validator(std::filesystem::path manifest_dir)
         : manifest_dir_(manifest_dir), current_acf_(nullptr){};
-    Validator()
-        : manifest_dir_(""), current_acf_(nullptr){};
+    Validator() : manifest_dir_(""), current_acf_(nullptr){};
     void set_acf(AcfInfo* acf) { current_acf_ = acf; };
     void set_game_dir(const std::filesystem::path& dir) {
       current_game_dir_ = dir;

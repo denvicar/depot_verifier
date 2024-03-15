@@ -2,3 +2,6 @@ build*
 ninja*
 .vscode
 *.bat
+.vs/CMake Overview
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json

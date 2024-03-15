@@ -98,7 +98,9 @@ namespace depotverifier {
     const vector<string>& manifests = current_acf_->manifests();
     for (auto it = manifests.rbegin(); it != manifests.rend(); ++it) {
       cout << "manifest: " << *it << '\n';
-      filesystem::path manifest_path = manifest_dir_.string().size()==0 ? filesystem::path{(*it)} : (manifest_dir_ / (*it));
+      filesystem::path manifest_path = manifest_dir_.string().size() == 0
+                                           ? filesystem::path{(*it)}
+                                           : (manifest_dir_ / (*it));
       if (!filesystem::exists(manifest_path)) {
         cout << "does not exist, going to the next one" << '\n';
         continue;

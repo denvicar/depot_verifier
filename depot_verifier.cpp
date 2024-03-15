@@ -22,24 +22,25 @@ int main(int argc, char* argv[]) {
   }
 
   if ((vm.count("manifests") == 0 && vm.count("game") != 0)
-  || (vm.count("manifests") != 0 && vm.count("game") == 0)) {
-    cerr << "The flags -g (--game) and -m (--manifests) need to be specified both or not at all\n";
+      || (vm.count("manifests") != 0 && vm.count("game") == 0)) {
+    cerr << "The flags -g (--game) and -m (--manifests) need to be specified "
+            "both or not at all\n";
     cerr << help_message;
     return 1;
   }
 
-  if (vm.count("game")!=0) {
+  if (vm.count("game") != 0) {
     string game_dir = vm["game"].as<string>();
     depotverifier::Validator validator;
     depotverifier::AcfInfo info(vm["manifests"].as<vector<string>>(), game_dir);
     validator.set_acf(&info);
-    validator.set_game_dir(path { game_dir });
+    validator.set_game_dir(path{game_dir});
     validator.Validate();
     validator.Clear();
     validator.PrintSummary();
     return 0;
   }
-  
+
   // did not use -m and -g, so appids have to be present
   if (vm.count("appids") < 1) {
     cerr << "Expected at least one appid\n";
