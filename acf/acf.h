@@ -14,6 +14,7 @@ namespace depotverifier {
   class AcfInfo {
   public:
     AcfInfo(){};
+    AcfInfo(std::vector<std::string> manifests, std::string game) : manifests_(manifests), installdir_(game){};
     AcfInfo(path p, string appid);
     string name() const { return name_; };
     string installdir() const { return installdir_; };

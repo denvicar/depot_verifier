@@ -18,7 +18,7 @@ using std::stringstream;
 using std::vector;
 using std::filesystem::path;
 
-string depotverifier::ByteToHex(string& hash) {
+string depotverifier::ByteToHex(const string& hash) {
   stringstream result;
   for (unsigned char ch : hash) {
     result << hex << setw(2) << setfill('0') << static_cast<int>(ch);

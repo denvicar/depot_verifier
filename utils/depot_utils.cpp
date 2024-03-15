@@ -8,8 +8,10 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <filesystem>
 
 namespace po = boost::program_options;
+namespace fs = std::filesystem;
 
 using std::cerr;
 using std::find_if;
@@ -36,7 +38,9 @@ void rtrim(string& line) {
 po::variables_map InitParse(int ac, char* av[], string& help_message) {
   po::arg = "PATH";
   po::options_description generic("Generic options");
-  generic.add_options()("help,h", "generate this help message");
+  generic.add_options()("help,h", "generate this help message")
+  ("manifests,m", po::value<std::vector<std::string>>()->multitoken(), "list of manifests files")
+  ("game,g", po::value<std::string>(), "game directory");
 
   po::options_description file_options("Config file options");
   file_options.add_options()("SteamDirectories.AcfDir",
@@ -64,7 +68,9 @@ po::variables_map InitParse(int ac, char* av[], string& help_message) {
                 .positional(pd)
                 .run(),
             vm);
-  po::store(po::parse_config_file("depot_verifier.ini", file_options, true),
+
+  if(fs::exists("depot_verifier.ini"))
+    po::store(po::parse_config_file("depot_verifier.ini", file_options, true),
             vm);
   po::notify(vm);
 
@@ -77,6 +83,8 @@ std::string GetHelpMessage(po::options_description opt) {
   ss << "Usage: depot_verifier.exe [options] appid1 [appid2 [...]]";
   ss << opt;
   ss << "\nOptions (except appids) have to be specified in depot_verifier.ini."
+     << "\nIf the -g (or --game) and -m (or --manifests) are specified the values in depot_verifier.ini are ignored."
+     << "\nAlso in that case you don't need to specify appids."
      << "\n";
   return ss.str();
 }

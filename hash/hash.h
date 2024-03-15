@@ -9,7 +9,7 @@
 // std::string get_hash_content(EVP_MD_CTX*, std::filesystem::path);
 
 namespace depotverifier {
-  std::string ByteToHex(std::string&);
+  std::string ByteToHex(const std::string&);
 
   class HashManager {
   public:
